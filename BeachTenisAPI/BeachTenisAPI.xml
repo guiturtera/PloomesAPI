@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BeachTenisAPI</name>
+    </assembly>
+    <members>
+        <member name="M:BeachTenisAPI.Controllers.UserController.GetUserInfo">
+            <summary>
+            Returns a list of all Users from the DB.
+            </summary>
+        </member>
+        <member name="M:BeachTenisAPI.Controllers.UserController.GetUserInfo(System.String)">
+            <summary>
+            Returns a specific user by his CPF.
+            </summary>
+            <param name="cpf">CPF of the user to search.</param>
+        </member>
+        <member name="M:BeachTenisAPI.Controllers.UserController.Post(System.String,System.String,System.DateTime)">
+            <summary>
+            Adds a new user to the DB.
+            </summary>
+            <param name="name">Name of the new user</param>
+            <param name="cpf">CPF of the new user. Note that if a CPF already exists, it will return 403 code.</param>
+            <param name="birth">Birth of the new user</param>
+        </member>
+    </members>
+</doc>
