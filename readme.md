@@ -4,7 +4,7 @@ To see documentation, run the program.
 The project url in Azure is `https://studyprojects.azurewebsites.net`
 Run setup steps and see the docs for more info.
 The admin cpf is cpf=`11111111111`, with password=`12345678`.
-Send this data via post to the url, in JSON format. You will receive an admin username, and the token.
+Send this data via post to the url `https://studyprojects.azurewebsites.net/api/Home/login`, in JSON format. You will receive an admin username, and the token.
 You will need to send this token via all `HEADER` authorization="Bearer <token>", in order to validate your entry.
 Check docs for the available methods.
 # Setup
