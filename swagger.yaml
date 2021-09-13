@@ -1,0 +1,1024 @@
+openapi: 3.0.1
+info:
+  title: BeachTenisAPI
+  description: "This project is only demonstrative. It is built for creation of Spreadsheets.\r\nIt has the auth, which is required for every method of User and Spreadsheet.\r\nYou can login via login in home. You need to authorize your application.\r\nThere are three levels of authorization:\r\nunauthorized = You need to login to get an access token.\r\nadmin = You have access to all http methods\r\ndefaultuser = You have access only to methods withoud /admin in the url."
+  contact:
+    name: Guilherme Turtera
+    email: guiturtera@hotmail.com
+  version: v1
+paths:
+  /api/Home/login:
+    post:
+      tags:
+        - Home
+      summary: Login into the application. This login is uses Bearer Token.
+      requestBody:
+        description: The specified CPF/Password of your user.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginModel'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/LoginModel'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/LoginModel'
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+        '404':
+          description: Not Found
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/UserTokenModel'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTokenModel'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/UserTokenModel'
+  /api/Spreadsheet/filter:
+    get:
+      tags:
+        - Spreadsheet
+      summary: Gets a specific Spreadsheet from the user.
+      parameters:
+        - name: day
+          in: query
+          description: Day of the Spreadsheet in the format `yyyy-mm-dd`
+          schema:
+            type: string
+            description: Day of the Spreadsheet in the format `yyyy-mm-dd`
+            format: date-time
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Spreadsheet'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Spreadsheet'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/Spreadsheet'
+        '401':
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Not Found
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+  /api/Spreadsheet:
+    get:
+      tags:
+        - Spreadsheet
+      summary: Get the spreadsheet from the authorized token.
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Spreadsheet'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Spreadsheet'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Spreadsheet'
+        '401':
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+  /api/Spreadsheet/admin/all:
+    get:
+      tags:
+        - Spreadsheet
+      summary: Gets all spreadsheets in the DB. Only works for admin tokens.
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Spreadsheet'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Spreadsheet'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Spreadsheet'
+        '401':
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+  /api/Spreadsheet/admin/add:
+    post:
+      tags:
+        - Spreadsheet
+      summary: Adds a new Spreadsheet to the user. Only works for admin tokens.
+      requestBody:
+        description: Sheet to add.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Spreadsheet'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/Spreadsheet'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/Spreadsheet'
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+        '401':
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Not Found
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+  /api/Spreadsheet/admin/edit:
+    put:
+      tags:
+        - Spreadsheet
+      summary: Edits a new Spreadsheet to the user. Only works for admin tokens.
+      requestBody:
+        description: Sheet to edit.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Spreadsheet'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/Spreadsheet'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/Spreadsheet'
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+        '401':
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Not Found
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+  /api/Spreadsheet/admin/remove:
+    delete:
+      tags:
+        - Spreadsheet
+      summary: Removes the Spreadsheet specified. Only works for admin tokens.
+      requestBody:
+        description: Sheet to edit.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Spreadsheet'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/Spreadsheet'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/Spreadsheet'
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+        '401':
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Not Found
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+  /api/User/info:
+    get:
+      tags:
+        - User
+      summary: Returns info about the current user
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+  /api/User/admin/get/all:
+    get:
+      tags:
+        - User
+      summary: Returns a list of all Users from the DB.
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+  '/api/User/admin/get/{cpf}':
+    get:
+      tags:
+        - User
+      summary: Returns a specific user by his CPF.
+      parameters:
+        - name: cpf
+          in: path
+          description: 'CPF of the user to search. Format it `^[0-9]{11}`'
+          required: true
+          schema:
+            type: string
+            description: 'CPF of the user to search. Format it `^[0-9]{11}`'
+            nullable: true
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/User'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Not Found
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+  /api/User/admin/delete:
+    delete:
+      tags:
+        - User
+      summary: >-
+        Deletes a user from DB. If user doesn't exist, will return 400
+        (BadRequest).
+      parameters:
+        - name: cpf
+          in: query
+          description: CPF of the user to delete from DB
+          schema:
+            type: string
+            description: CPF of the user to delete from DB
+            nullable: true
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+        '401':
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+  /api/User/admin/add:
+    post:
+      tags:
+        - User
+      summary: Adds a new user to the DB.
+      requestBody:
+        description: Json of the new user to add. See User Schema for more info
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+        '401':
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+  /api/User/admin/edit:
+    put:
+      tags:
+        - User
+      summary: Edit a specific user from the DB.
+      requestBody:
+        description: Data of the user to edit
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+        '401':
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Forbidden
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Not Found
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/HttpResponseMessage'
+components:
+  schemas:
+    LoginModel:
+      required:
+        - cpf
+        - password
+      type: object
+      properties:
+        cpf:
+          pattern: '^[0-9]{11}'
+          type: string
+          description: CPF of an existing user.
+        password:
+          minLength: 8
+          type: string
+          description: Password of an existing user.
+          format: password
+      additionalProperties: false
+      description: Schema for realizing login.
+    Version:
+      type: object
+      properties:
+        major:
+          type: integer
+          format: int32
+          readOnly: true
+        minor:
+          type: integer
+          format: int32
+          readOnly: true
+        build:
+          type: integer
+          format: int32
+          readOnly: true
+        revision:
+          type: integer
+          format: int32
+          readOnly: true
+        majorRevision:
+          type: integer
+          format: int32
+          readOnly: true
+        minorRevision:
+          type: integer
+          format: int32
+          readOnly: true
+      additionalProperties: false
+    StringStringIEnumerableKeyValuePair:
+      type: object
+      properties:
+        key:
+          type: string
+          nullable: true
+          readOnly: true
+        value:
+          type: array
+          items:
+            type: string
+          nullable: true
+          readOnly: true
+      additionalProperties: false
+    HttpContent:
+      type: object
+      properties:
+        headers:
+          type: array
+          items:
+            $ref: '#/components/schemas/StringStringIEnumerableKeyValuePair'
+          nullable: true
+          readOnly: true
+      additionalProperties: false
+    HttpStatusCode:
+      enum:
+        - 100
+        - 101
+        - 102
+        - 103
+        - 200
+        - 201
+        - 202
+        - 203
+        - 204
+        - 205
+        - 206
+        - 207
+        - 208
+        - 226
+        - 300
+        - 301
+        - 302
+        - 303
+        - 304
+        - 305
+        - 306
+        - 307
+        - 308
+        - 400
+        - 401
+        - 402
+        - 403
+        - 404
+        - 405
+        - 406
+        - 407
+        - 408
+        - 409
+        - 410
+        - 411
+        - 412
+        - 413
+        - 414
+        - 415
+        - 416
+        - 417
+        - 421
+        - 422
+        - 423
+        - 424
+        - 426
+        - 428
+        - 429
+        - 431
+        - 451
+        - 500
+        - 501
+        - 502
+        - 503
+        - 504
+        - 505
+        - 506
+        - 507
+        - 508
+        - 510
+        - 511
+      type: integer
+      format: int32
+    HttpVersionPolicy:
+      enum:
+        - 0
+        - 1
+        - 2
+      type: integer
+      format: int32
+    HttpMethod:
+      type: object
+      properties:
+        method:
+          type: string
+          nullable: true
+          readOnly: true
+      additionalProperties: false
+    HttpRequestMessage:
+      type: object
+      properties:
+        version:
+          $ref: '#/components/schemas/Version'
+        versionPolicy:
+          $ref: '#/components/schemas/HttpVersionPolicy'
+        content:
+          $ref: '#/components/schemas/HttpContent'
+        method:
+          $ref: '#/components/schemas/HttpMethod'
+        requestUri:
+          type: string
+          format: uri
+          nullable: true
+        headers:
+          type: array
+          items:
+            $ref: '#/components/schemas/StringStringIEnumerableKeyValuePair'
+          nullable: true
+          readOnly: true
+        properties:
+          type: object
+          additionalProperties: {}
+          nullable: true
+          readOnly: true
+          deprecated: true
+        options:
+          type: object
+          additionalProperties: {}
+          nullable: true
+          readOnly: true
+      additionalProperties: false
+    HttpResponseMessage:
+      type: object
+      properties:
+        version:
+          $ref: '#/components/schemas/Version'
+        content:
+          $ref: '#/components/schemas/HttpContent'
+        statusCode:
+          $ref: '#/components/schemas/HttpStatusCode'
+        reasonPhrase:
+          type: string
+          nullable: true
+        headers:
+          type: array
+          items:
+            $ref: '#/components/schemas/StringStringIEnumerableKeyValuePair'
+          nullable: true
+          readOnly: true
+        trailingHeaders:
+          type: array
+          items:
+            $ref: '#/components/schemas/StringStringIEnumerableKeyValuePair'
+          nullable: true
+          readOnly: true
+        requestMessage:
+          $ref: '#/components/schemas/HttpRequestMessage'
+        isSuccessStatusCode:
+          type: boolean
+          readOnly: true
+      additionalProperties: false
+    EnumUserRoles:
+      enum:
+        - 0
+        - 1
+      type: integer
+      description: Available Roles for a User. It specifies which methods thei have access
+      format: int32
+    User:
+      required:
+        - birthDate
+        - cpf
+        - name
+        - password
+        - role
+      type: object
+      properties:
+        cpf:
+          pattern: '^[0-9]{11}'
+          type: string
+          description: "The CPF of the User. It is a PK. Format must be `^[0-9]{11}`. \r\nNot added math verification."
+        name:
+          type: string
+          description: The name of the user.
+        birthDate:
+          type: string
+          description: Birth date of the user.
+          format: date
+        role:
+          $ref: '#/components/schemas/EnumUserRoles'
+        password:
+          minLength: 8
+          type: string
+          description: Password of the user. Will be stored as HASH in the DB.
+          format: password
+      additionalProperties: false
+      description: Are used to store data about a person
+    UserTokenModel:
+      required:
+        - token
+        - user
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        token:
+          type: string
+          description: 'Token of a user, available for 2 hours.'
+      additionalProperties: false
+      description: Used for return of the login
+    Spreadsheet:
+      required:
+        - coach
+        - day
+        - distance
+        - pace
+        - user
+      type: object
+      properties:
+        user:
+          type: string
+          description: 'User CPF is used as a FK, and builds a Composite PK with `Day`.'
+        coach:
+          type: string
+          description: The CPF of the COACH.
+        day:
+          type: string
+          description: >-
+            The day of the Spreadsheet in the format `yyyy-mm-dd`. There is only
+            only Spreadsheet in a day.
+          format: date
+        distance:
+          type: number
+          description: Distance to do in kilometers.
+          format: double
+        pace:
+          type: number
+          description: 'Pace to keep for the distance, in km'
+          format: double
+      additionalProperties: false
+      description: Spreadsheet for users.
+    ProblemDetails:
+      type: object
+      properties:
+        type:
+          type: string
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        status:
+          type: integer
+          format: int32
+          nullable: true
+        detail:
+          type: string
+          nullable: true
+        instance:
+          type: string
+          nullable: true
+      additionalProperties: {}
+  securitySchemes:
+    Bearer:
+      type: http
+      description: Put **_ONLY_** your JWT Bearer token on textbox below!
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - Bearer: []
