@@ -4,7 +4,52 @@
         <name>BeachTenisAPI</name>
     </assembly>
     <members>
-        <member name="M:BeachTenisAPI.Controllers.UserController.GetUserInfo">
+        <member name="M:BeachTenisAPI.Controllers.HomeController.Authenticate(BeachTenisAPI.LoginModel)">
+            <summary>
+            Login into the application. This login is uses Bearer Token.
+            </summary>
+            <param name="login">The specified CPF/Password of your user.</param>
+        </member>
+        <member name="M:BeachTenisAPI.Controllers.SpreadsheetController.GetSpreadsheetsFromUserByDay(System.DateTime)">
+            <summary>
+            Gets a specific Spreadsheet from the user.
+            </summary>
+            <param name="day">Day of the Spreadsheet in the format `yyyy-mm-dd`</param>
+        </member>
+        <member name="M:BeachTenisAPI.Controllers.SpreadsheetController.GetSpreadsheetsFromUser">
+            <summary>
+            Get the spreadsheet from the authorized token.
+            </summary>
+        </member>
+        <member name="M:BeachTenisAPI.Controllers.SpreadsheetController.GetAllSpreadsheets">
+            <summary>
+            Gets all spreadsheets in the DB. Only works for admin tokens.
+            </summary>
+        </member>
+        <member name="M:BeachTenisAPI.Controllers.SpreadsheetController.AddNew(BeachTenisAPI.Models.Spreadsheet)">
+            <summary>
+            Adds a new Spreadsheet to the user. Only works for admin tokens.
+            </summary>
+            <param name="sheet">Sheet to add.</param>
+        </member>
+        <member name="M:BeachTenisAPI.Controllers.SpreadsheetController.EditSpreadsheet(BeachTenisAPI.Models.Spreadsheet)">
+            <summary>
+            Edits a new Spreadsheet to the user. Only works for admin tokens.
+            </summary>
+            <param name="sheet">Sheet to edit.</param>
+        </member>
+        <member name="M:BeachTenisAPI.Controllers.SpreadsheetController.DeleteSpreadsheet(BeachTenisAPI.Models.Spreadsheet)">
+            <summary>
+            Removes the Spreadsheet specified. Only works for admin tokens.
+            </summary>
+            <param name="sheet">Sheet to edit.</param>
+        </member>
+        <member name="M:BeachTenisAPI.Controllers.UserController.GetCurrentUserInfo">
+            <summary>
+            Returns info about the current user
+            </summary>
+        </member>
+        <member name="M:BeachTenisAPI.Controllers.UserController.GetUsersInfo">
             <summary>
             Returns a list of all Users from the DB.
             </summary>
@@ -13,15 +58,133 @@
             <summary>
             Returns a specific user by his CPF.
             </summary>
-            <param name="cpf">CPF of the user to search.</param>
+            <param name="cpf">CPF of the user to search. Format it `^[0-9]{11}`</param>
         </member>
-        <member name="M:BeachTenisAPI.Controllers.UserController.Post(System.String,System.String,System.DateTime)">
+        <member name="M:BeachTenisAPI.Controllers.UserController.DeleteUser(System.String)">
+            <summary>
+            Deletes a user from DB. If user doesn't exist, will return 400 (BadRequest).
+            </summary>
+            <param name="cpf">CPF of the user to delete from DB</param>
+        </member>
+        <member name="M:BeachTenisAPI.Controllers.UserController.AddUser(BeachTenisAPI.Models.User)">
             <summary>
             Adds a new user to the DB.
             </summary>
-            <param name="name">Name of the new user</param>
-            <param name="cpf">CPF of the new user. Note that if a CPF already exists, it will return 403 code.</param>
-            <param name="birth">Birth of the new user</param>
+            <param name="newUser">Json of the new user to add. See User Schema for more info</param>
+        </member>
+        <member name="M:BeachTenisAPI.Controllers.UserController.EditUser(BeachTenisAPI.Models.User)">
+            <summary>
+            Edit a specific user from the DB.
+            </summary>
+            <param name="user">Data of the user to edit</param>
+        </member>
+        <member name="T:BeachTenisAPI.LoginModel">
+            <summary>
+            Schema for realizing login.
+            </summary>
+        </member>
+        <member name="P:BeachTenisAPI.LoginModel.CPF">
+            <summary>
+            CPF of an existing user.
+            </summary>
+        </member>
+        <member name="P:BeachTenisAPI.LoginModel.Password">
+            <summary>
+            Password of an existing user.
+            </summary>
+        </member>
+        <member name="T:BeachTenisAPI.Models.Spreadsheet">
+            <summary>
+            Spreadsheet for users.
+            </summary>
+        </member>
+        <member name="P:BeachTenisAPI.Models.Spreadsheet.User">
+            <summary>
+            User CPF is used as a FK, and builds a Composite PK with `Day`.
+            </summary>
+        </member>
+        <member name="P:BeachTenisAPI.Models.Spreadsheet.Coach">
+            <summary>
+            The CPF of the COACH.
+            </summary>
+        </member>
+        <member name="P:BeachTenisAPI.Models.Spreadsheet.Day">
+            <summary>
+            The day of the Spreadsheet in the format `yyyy-mm-dd`. There is only only Spreadsheet in a day.
+            </summary>
+        </member>
+        <member name="P:BeachTenisAPI.Models.Spreadsheet.Distance">
+            <summary>
+            Distance to do in kilometers.
+            </summary>
+        </member>
+        <member name="P:BeachTenisAPI.Models.Spreadsheet.Pace">
+            <summary>
+            Pace to keep for the distance, in km
+            </summary>
+        </member>
+        <member name="T:BeachTenisAPI.Models.EnumUserRoles">
+            <summary>
+            Available Roles for a User. It specifies which methods thei have access
+            </summary>
+        </member>
+        <member name="F:BeachTenisAPI.Models.EnumUserRoles.Admin">
+            <summary>
+            Admin have access to all methods.
+            </summary>
+        </member>
+        <member name="F:BeachTenisAPI.Models.EnumUserRoles.DefaultUser">
+            <summary>
+            DefaultUser only have access to their data.
+            </summary>
+        </member>
+        <member name="T:BeachTenisAPI.Models.User">
+            <summary>
+            Are used to store data about a person
+            </summary>
+        </member>
+        <member name="P:BeachTenisAPI.Models.User.CPF">
+            <summary>
+            The CPF of the User. It is a PK. Format must be `^[0-9]{11}`. 
+            Not added math verification.
+            </summary>
+        </member>
+        <member name="P:BeachTenisAPI.Models.User.Name">
+            <summary>
+            The name of the user.
+            </summary>
+        </member>
+        <member name="P:BeachTenisAPI.Models.User.BirthDate">
+            <summary>
+            Birth date of the user.
+            </summary>
+        </member>
+        <member name="P:BeachTenisAPI.Models.User.Role">
+            <summary>
+            Admin = 0
+            DefaultUser = 1
+            Check EnumUserRoles for more info
+            </summary>
+        </member>
+        <member name="P:BeachTenisAPI.Models.User.Password">
+            <summary>
+            Password of the user. Will be stored as HASH in the DB.
+            </summary>
+        </member>
+        <member name="T:BeachTenisAPI.Models.UserTokenModel">
+            <summary>
+            Used for return of the login
+            </summary>
+        </member>
+        <member name="P:BeachTenisAPI.Models.UserTokenModel.User">
+            <summary>
+            The current login of the user without its key.
+            </summary>
+        </member>
+        <member name="P:BeachTenisAPI.Models.UserTokenModel.Token">
+            <summary>
+            Token of a user, available for 2 hours.
+            </summary>
         </member>
     </members>
 </doc>

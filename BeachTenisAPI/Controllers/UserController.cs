@@ -7,23 +7,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
+using System.Web.Http.ModelBinding;
+using BeachTenisAPI.Security;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BeachTenisAPI.Controllers
 {
-    /*
-        Controller has the following logic:
-           RETRIEVES DATA
-            GET -> returns specific data. Doesn't change logic
-            HEAD -> same as get, but does not retrieve the data. used to validate GET request.
-           ADDS DADA:
-            POST -> update resources
-            PUT -> similar to POST, though, the same command will not affect others. it is idempotent (no side effect).
-                It means that, if you call a PUT command multiple times, it will generate the same result
-            PATCH -> 'incremental', to update some resource
-           DELETES DATA
-            DELETE -> Delete some resource.
-     */
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
@@ -36,23 +28,41 @@ namespace BeachTenisAPI.Controllers
         }
 
         /// <summary>
+        /// Returns info about the current user
+        /// </summary>
+        [HttpGet("info")]
+        [ProducesResponseType((int)System.Net.HttpStatusCode.OK, Type = typeof(IEnumerable<User>))]
+        [Authorize]
+        public ActionResult GetCurrentUserInfo()
+        {
+            var claims = User.Identities.First().Claims.ToList();
+            string cpf = claims?.FirstOrDefault(x => x.Type.Equals("cpf", StringComparison.OrdinalIgnoreCase)).Value;
+            var user = _db.Users.Find(cpf);
+            return new JsonResult(user);
+        }
+
+        /// <summary>
         /// Returns a list of all Users from the DB.
         /// </summary>
-        [HttpGet]
+        [HttpGet("admin/get/all")]
         [ProducesResponseType((int)System.Net.HttpStatusCode.OK, Type = typeof(IEnumerable<User>))]
-        public IEnumerable<User> GetUserInfo()
+        [Authorize(Roles = "admin")]
+        public ActionResult GetUsersInfo()
         {
-            var users = _db.Users;
-            return users;
+            var users = _db.Users.ToList();
+            return new JsonResult(users);
         }
 
         /// <summary>
         /// Returns a specific user by his CPF.
         /// </summary>
-        /// <param name="cpf">CPF of the user to search.</param>
-        [HttpGet("{cpf}")]
+        /// <param name="cpf">CPF of the user to search. Format it `^[0-9]{11}`</param>
+        [HttpGet("admin/get/{cpf}")]
+        [ProducesResponseType((int)System.Net.HttpStatusCode.Unauthorized, Type = typeof(void))]
+        [ProducesResponseType((int)System.Net.HttpStatusCode.Forbidden, Type = typeof(void))]
         [ProducesResponseType((int)System.Net.HttpStatusCode.OK, Type = typeof(User))]
         [ProducesResponseType((int)System.Net.HttpStatusCode.NotFound, Type = typeof(HttpResponseMessage))]
+        [Authorize(Roles = "admin")]
         public ActionResult GetUserInfo(string cpf)
         {
             // If no user is found, will let it raise 204 error.
@@ -72,38 +82,148 @@ namespace BeachTenisAPI.Controllers
         }
 
         /// <summary>
+        /// Deletes a user from DB. If user doesn't exist, will return 400 (BadRequest).
+        /// </summary>
+        /// <param name="cpf">CPF of the user to delete from DB</param>
+        [HttpDelete("admin/delete")]
+        [ProducesResponseType((int)System.Net.HttpStatusCode.OK, Type = typeof(void))]
+        [ProducesResponseType((int)System.Net.HttpStatusCode.Unauthorized, Type = typeof(void))]
+        [ProducesResponseType((int)System.Net.HttpStatusCode.Forbidden, Type = typeof(void))]
+        [ProducesResponseType((int)System.Net.HttpStatusCode.BadRequest, Type = typeof(HttpResponseMessage))]
+        [Authorize(Roles = "admin")]
+        public ActionResult DeleteUser(string cpf)
+        {
+            User userToDelete;
+            bool userExists = UserExists(cpf, out userToDelete);
+
+            HttpResponseMessage errorResponse;
+            if (!ValidateUserExists(cpf, out userToDelete, out errorResponse))
+                return new JsonResult(errorResponse);
+
+            _db.Users.Remove(userToDelete);
+            _db.SaveChanges();
+
+            return Ok();
+        }
+
+        /// <summary>
         /// Adds a new user to the DB.
         /// </summary>
-        /// <param name="name">Name of the new user</param>
-        /// <param name="cpf">CPF of the new user. Note that if a CPF already exists, it will return 403 code.</param>
-        /// <param name="birth">Birth of the new user</param>
-        [HttpPost("add")]
+        /// <param name="newUser">Json of the new user to add. See User Schema for more info</param>
+        [HttpPost("admin/add")]
         [ProducesResponseType((int) System.Net.HttpStatusCode.OK, Type = typeof(void))]
+        [ProducesResponseType((int)System.Net.HttpStatusCode.Unauthorized, Type = typeof(void))]
         [ProducesResponseType((int) System.Net.HttpStatusCode.Forbidden, Type = typeof(HttpResponseMessage))]
-        public ActionResult Post(string name, string cpf, DateTime birth)
+        [ProducesResponseType((int) System.Net.HttpStatusCode.BadRequest, Type = typeof(HttpResponseMessage))]
+        [Authorize(Roles = "admin")]
+        public ActionResult AddUser([FromBody]User newUser)
         {
-            var user = _db.Users.Find(cpf);
-            if (user != null)
-            {
-                var response = new HttpResponseMessage(System.Net.HttpStatusCode.Forbidden)
-                {
-                    Content = new StringContent($"User with CPF `{cpf}` already exists"),
-                    ReasonPhrase = "User with existing CPF"
-                };
-                return new JsonResult(response);
-            }
+            // Chose to add validation here. Could add in Schemas 
+            HttpResponseMessage errorResponse;
+            if (!ValidUser(newUser, out errorResponse) || !ValidateUserNotExists(newUser.CPF, out errorResponse))
+                return new JsonResult(errorResponse);
 
-            var newUser = new User()
-            {
-                Name = name,
-                CPF = cpf,
-                BirthDate = birth
-            };
+            newUser.Password = new UserSecurity().EncryptPassword(newUser.Password);
 
             _db.Users.Add(newUser);
             _db.SaveChanges();
 
             return Ok();
+        }
+
+        /// <summary>
+        /// Edit a specific user from the DB.
+        /// </summary>
+        /// <param name="user">Data of the user to edit</param>
+        [HttpPut("admin/edit")]
+        [ProducesResponseType((int)System.Net.HttpStatusCode.OK, Type = typeof(void))]
+        [ProducesResponseType((int)System.Net.HttpStatusCode.Unauthorized, Type = typeof(void))]
+        [ProducesResponseType((int)System.Net.HttpStatusCode.Forbidden, Type = typeof(void))]
+        [ProducesResponseType((int)System.Net.HttpStatusCode.NotFound, Type = typeof(HttpResponseMessage))]
+        [ProducesResponseType((int)System.Net.HttpStatusCode.BadRequest, Type = typeof(HttpResponseMessage))]
+        [Authorize(Roles = "admin")]
+        public ActionResult EditUser([FromBody]User user)
+        {
+            HttpResponseMessage errorResponse;
+            if (!ValidUser(user, out errorResponse))
+                return new JsonResult(errorResponse);
+
+            user.Password = new UserSecurity().EncryptPassword(user.Password);
+
+            _db.Users.Update(user);
+            try
+            {
+                _db.SaveChanges();
+            }
+            catch (Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException)
+            {
+                errorResponse = new HttpResponseMessage(System.Net.HttpStatusCode.NotFound)
+                {
+                    Content = new StringContent($"User with {user.CPF} doesn't exist. Try adding before editing."),
+                    ReasonPhrase = "User don't exist"
+                };
+                return new JsonResult(errorResponse);
+            }
+
+            return Ok();
+        }
+
+        private bool ValidUser(User user, out HttpResponseMessage errorResponse)
+        {
+            errorResponse = null;
+            if (!ModelState.IsValid)
+            {
+                var allErrors = (string[])ModelState.Values.SelectMany(v => v.Errors.Select(b => b.ErrorMessage));
+                errorResponse = new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest)
+                {
+                    Content = new StringContent(String.Join(',', allErrors)),
+                    ReasonPhrase = "Invalid parameters."
+                };
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool UserExists(string cpf, out User user)
+        {
+            user = _db.Users.Find(cpf);
+            return user != null;
+        }
+
+        private bool ValidateUserExists(string cpf, out User user, out HttpResponseMessage errorResponse)
+        {
+            user = null;
+            errorResponse = null;
+            bool userExists = UserExists(cpf, out user);
+
+            if (!userExists)
+            {
+                errorResponse = new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest)
+                {
+                    Content = new StringContent($"User with CPF `{cpf}` does not exists"),
+                    ReasonPhrase = "User not found!"
+                };
+                return false;
+            }
+
+            return userExists;
+        }
+
+        private bool ValidateUserNotExists(string cpf, out HttpResponseMessage errorResponse)
+        {
+            errorResponse = null;
+            bool valid = !UserExists(cpf, out User user);
+            if (!valid)
+            {
+                errorResponse = new HttpResponseMessage(System.Net.HttpStatusCode.Forbidden)
+                {
+                    Content = new StringContent($"User with CPF `{cpf}` already exists"),
+                    ReasonPhrase = "User already exists"
+                };
+            }
+
+            return valid;
         }
     }
 }
