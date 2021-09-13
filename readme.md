@@ -1,7 +1,9 @@
 # Summary
 This project has the purpose of storing data from user, and with that, create Spreadsheets for them.
-The logic is: based on JSON Web Tokens auth, the user will have access to specific features.
-The login hash used is a SHA256 with some salt to improve the security.
+
+Validation: based on JSON Web Tokens auth, the user will have access to specific features.
+
+Login: used SHA256 as hash with some salt to improve the security.
 
 There are 3 different access types:
 unauthorized: when you don't have a token, you only have access to login page.
