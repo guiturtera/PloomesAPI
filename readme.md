@@ -16,6 +16,11 @@ To overcome this, I created a file named `swagger.yaml` in the root of the proje
 
 Another way to see docs is to clone the project and run it, Swagger will be available for using.
 # How to use
+I have created a custom POSTMan api for using the API. Just import the url https://www.postman.com/collections/41375fd4f2d369b03293 into postman.
+You will have to log in and enable the Bearer token in the authorization, as explained in the bellow text.
+
+Another easier way of testing the application is importing the `swagger.yaml` file content into POSTMan. It will create a custom API for you, other than the manually created for my tests. 
+
 Clone this repo into a folder and install the packages needed for NuPackage.
 To see documentation, see the previous step `Docs`.
 The project url in Azure is `https://studyprojects.azurewebsites.net`
